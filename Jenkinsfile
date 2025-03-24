@@ -5,7 +5,9 @@ pipeline {
     stage('Kill Running Processes') {
       steps {
         // Tuer tous les processus dotnet en cours
-        sh 'pkill -f dotnet || true'
+        sh '''
+        pkill -f dotnet || true
+        '''
       }
     }
 
@@ -15,6 +17,7 @@ pipeline {
         sh '''
         find . -type d -name "bin" -exec rm -rf {} +
         find . -type d -name "obj" -exec rm -rf {} +
+        find . -type d -name "tmp-webcil" -exec rm -rf {} +
         '''
       }
     }
@@ -41,15 +44,27 @@ pipeline {
     }
 
     stage('Tests') {
-      steps {
-        // Exécuter les tests unitaires
-        sh 'dotnet test tests/UnitTests --no-build --logger "trx;LogFileName=unit-tests.trx"'
+      parallel {
+        stage('Unit') {
+          steps {
+            // Exécuter les tests unitaires
+            sh 'dotnet test tests/UnitTests --no-build --logger "trx;LogFileName=unit-tests.trx"'
+          }
+        }
 
-        // Exécuter les tests d'intégration
-        sh 'dotnet test tests/IntegrationTests --no-build --logger "trx;LogFileName=integration-tests.trx"'
+        stage('Integration') {
+          steps {
+            // Exécuter les tests d'intégration
+            sh 'dotnet test tests/IntegrationTests --no-build --logger "trx;LogFileName=integration-tests.trx"'
+          }
+        }
 
-        // Exécuter les tests fonctionnels
-        sh 'dotnet test tests/FunctionalTests --no-build --logger "trx;LogFileName=functional-tests.trx"'
+        stage('Functional') {
+          steps {
+            // Exécuter les tests fonctionnels
+            sh 'dotnet test tests/FunctionalTests --no-build --logger "trx;LogFileName=functional-tests.trx"'
+          }
+        }
       }
     }
 
