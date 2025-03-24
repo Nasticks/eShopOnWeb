@@ -55,31 +55,4 @@ pipeline {
         stage('Integration') {
           steps {
             // Exécuter les tests d'intégration
-            sh 'dotnet test tests/IntegrationTests --no-build --logger "trx;LogFileName=integration-tests.trx"'
-          }
-        }
-
-        stage('Functional') {
-          steps {
-            // Exécuter les tests fonctionnels
-            sh 'dotnet test tests/FunctionalTests --no-build --logger "trx;LogFileName=functional-tests.trx"'
-          }
-        }
-      }
-    }
-
-    stage('Deployment') {
-      steps {
-        // Publier l'application dans le dossier spécifié
-        sh 'dotnet publish eShopOnWeb.sln -o /var/aspnet'
-      }
-    }
-  }
-
-  post {
-    always {
-      // Archiver les résultats des tests pour une analyse ultérieure
-      archiveArtifacts artifacts: '**/*.trx', allowEmptyArchive: true
-    }
-  }
-}
+            sh 'dotnet test tests/IntegrationTests --no-build --logger "trx;LogFileName=int
